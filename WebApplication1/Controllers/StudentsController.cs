@@ -58,5 +58,47 @@ namespace WebApplication1.Controllers
 
         }
         
+        [HttpPost]
+        public IActionResult AddStudent(Student newStudent)
+        {
+            newStudent.IdStudent = new Random().Next(10000);
+            _students.Add(newStudent);
+            return Ok(newStudent);
+        }
+
+        [HttpPut("{idStudent}")]
+        public IActionResult UpdateStudent(int idStudent, Student updatedData)
+        {
+            if (idStudent != updatedData.IdStudent)
+            {
+                return BadRequest($"Id in the URL ({idStudent}) does not match the id in the request body {updatedData.IdStudent}");
+            }
+            
+            foreach (var student in _students)
+            {
+                if (student.IdStudent == updatedData.IdStudent)
+                {
+                    student.FirstName = updatedData.FirstName;
+                    student.LastName = updatedData.LastName;
+                    student.Email = updatedData.Email;
+                    student.IndexNumber = updatedData.IndexNumber;
+                   
+                    return Ok(student);
+                    
+                }
+            }
+            
+            return NotFound($"Student with the id {updatedData.IdStudent} cannot be found");
+        }
+
+        [HttpDelete("{idStudent}")]
+
+        public IActionResult DeleteStudent(int idStudent)
+        {
+            return Ok();
+        }
+        
+                      
+        
     }
 }
