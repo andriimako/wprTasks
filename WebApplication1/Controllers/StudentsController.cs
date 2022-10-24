@@ -45,16 +45,25 @@ namespace WebApplication1.Controllers
         [HttpGet("{studentId}")]
         public IActionResult GetStudent(int studentId)
         {
-            Student st = null;
-            foreach (Student s in _students)
+            
+            var student = FindStudent(studentId);
+            if (student == null)
             {
-                if (s.IdStudent == studentId)
-                {
-                    return Ok(s);
-                }
+                return NotFound($"Student with the id {studentId} cannot be found");
             }
 
-            return NotFound($"Student with the id {studentId}  was not found");
+            return Ok(student);
+
+            // Student st = null;
+            // foreach (Student s in _students)
+            // {
+            //     if (s.IdStudent == studentId)
+            //     {
+            //         return Ok(s);
+            //     }
+            // }
+            //
+            // return NotFound($"Student with the id {studentId}  was not found");
 
         }
         
@@ -113,6 +122,7 @@ namespace WebApplication1.Controllers
                 {
                     return student;
                 }
+                
             }
 
             return null;
