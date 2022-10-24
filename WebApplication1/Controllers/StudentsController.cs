@@ -95,7 +95,27 @@ namespace WebApplication1.Controllers
 
         public IActionResult DeleteStudent(int idStudent)
         {
-            return Ok();
+            var student = FindStudent(idStudent);
+            if (student == null)
+            {
+                return NotFound($"Student with the id {idStudent} cannot be found");
+            }
+            _students.Remove(student);
+            
+            return Ok(student);
+        }
+
+        private Student FindStudent(int idStudentSearch)
+        {
+            foreach (var student in _students)
+            {
+                if (student.IdStudent == idStudentSearch)
+                {
+                    return student;
+                }
+            }
+
+            return null;
         }
         
                       
