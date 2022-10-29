@@ -14,42 +14,39 @@ namespace WebApplication1.Controllers
     public class StudentsController : ControllerBase
     {
         List<Student> _students = new List<Student>();
+
         public StudentsController()
         {
-            // _students.Add(new Student
-            // {
-            //     IdStudent = 1,
-            //     FirstName = "Dima",
-            //     LastName = "Dmitrov",
-            //     Address = "Abbey Road 420",
-            //     Email = "dd@666.com",
-            //     IndexNumber = "s69"
-            // });
-            // _students.Add(new Student
-            // {
-            //     IdStudent = 2,
-            //     FirstName = "Dima",
-            //     LastName = "Dmitrov",
-            //     Address = "Abbey Road 420",
-            //     Email = "dd2@666.com",
-            //     IndexNumber = "s420"
-            // });
         }
 
         [HttpGet]
-        public IActionResult GetStudents()
+        public IActionResult GetStudents(string orderByColumn)
         {
             SqlConnection con =
                 new SqlConnection(
                     "Data Source=localhost,1433;Initial Catalog=master;User ID=SA;Password=<YourStrong@Passw0rd>");
             SqlCommand com = new SqlCommand();
-            
+
             com.Connection = con;
-            com.CommandText = "select * from Student";
-        
+            if (String.Equals(orderByColumn, "name", StringComparison.OrdinalIgnoreCase))
+            {
+                com.CommandText = "select * from Student ORDER BY FirstName";
+            }
+            else if (String.Equals(orderByColumn, "surname", StringComparison.OrdinalIgnoreCase))
+            {
+                com.CommandText = "select * from Student ORDER BY LastName";
+            }
+            else if (String.Equals(orderByColumn, "id", StringComparison.OrdinalIgnoreCase))
+
+            {
+                com.CommandText = "select * from Student";
+            }
+            else return NotFound("not expected value");
+
+
             con.Open();
             SqlDataReader dr = com.ExecuteReader();
-        
+
             List<Student> names = new List<Student>();
             while (dr.Read())
             {
@@ -58,39 +55,11 @@ namespace WebApplication1.Controllers
                 st.FirstName = dr["FirstName"].ToString();
                 st.LastName = dr["LastName"].ToString();
                 names.Add(st);
-                
             }
-            
+
             return Ok(names);
         }
-        
-        // [HttpGet]
-        // public IActionResult GetStudents2()
-        // {
-        //     //1. Connection to remote db
-        //     //Package manager - NuGet
-        //     //Connection string
-        //     SqlConnection con = new SqlConnection("Data Source=localhost,1433;Initial Catalog=master;User ID=SA;Password=<YourStrong@Passw0rd>");
-        //
-        //     SqlCommand com = new SqlCommand();
-        //     com.Connection = con;
-        //     com.CommandText = "select * from student";
-        //
-        //     //2. Send the SQL
-        //     con.Open();
-        //     SqlDataReader dr = com.ExecuteReader();
-        //
-        //     //3. Get the result back
-        //     List<string> names = new List<string>();
-        //     while (dr.Read())
-        //     {
-        //         string lname = dr["LastName"].ToString();
-        //         names.Add(lname);
-        //     }
-        //
-        //     //4. Return the result as JSON
-        //     return Ok(names);
-        // }
+
 
         [HttpGet("{studentId}")]
         public IActionResult GetStudent(int studentId)
