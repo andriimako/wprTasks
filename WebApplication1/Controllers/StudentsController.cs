@@ -13,32 +13,31 @@ namespace WebApplication1.Controllers
     [ApiController]
     public class StudentsController : ControllerBase
     {
-        private List<Student> _students = new List<Student>();
-
+        List<Student> _students = new List<Student>();
         public StudentsController()
         {
-            _students.Add(new Student
-            {
-                IdStudent = 1,
-                FirstName = "Dima",
-                LastName = "Dmitrov",
-                Address = "Abbey Road 420",
-                Email = "dd@666.com",
-                IndexNumber = "s69"
-            });
-            _students.Add(new Student
-            {
-                IdStudent = 2,
-                FirstName = "Dima",
-                LastName = "Dmitrov",
-                Address = "Abbey Road 420",
-                Email = "dd2@666.com",
-                IndexNumber = "s420"
-            });
+            // _students.Add(new Student
+            // {
+            //     IdStudent = 1,
+            //     FirstName = "Dima",
+            //     LastName = "Dmitrov",
+            //     Address = "Abbey Road 420",
+            //     Email = "dd@666.com",
+            //     IndexNumber = "s69"
+            // });
+            // _students.Add(new Student
+            // {
+            //     IdStudent = 2,
+            //     FirstName = "Dima",
+            //     LastName = "Dmitrov",
+            //     Address = "Abbey Road 420",
+            //     Email = "dd2@666.com",
+            //     IndexNumber = "s420"
+            // });
         }
 
         [HttpGet]
-        public IActionResult GetStudents(int studentId)
+        public IActionResult GetStudents()
         {
             SqlConnection con =
                 new SqlConnection(
@@ -47,20 +46,51 @@ namespace WebApplication1.Controllers
             
             com.Connection = con;
             com.CommandText = "select * from Student";
-
-            //2. Send the SQL
+        
             con.Open();
             SqlDataReader dr = com.ExecuteReader();
-            
-            List<string> names = new List<string>();
+        
+            List<Student> names = new List<Student>();
             while (dr.Read())
             {
-                string lname = dr["LastName "].ToString();
-                names.Add(lname);
+                var st = new Student();
+                st.IdStudent = (int)dr["IdStudent"];
+                st.FirstName = dr["FirstName"].ToString();
+                st.LastName = dr["LastName"].ToString();
+                names.Add(st);
+                
             }
-
+            
             return Ok(names);
         }
+        
+        // [HttpGet]
+        // public IActionResult GetStudents2()
+        // {
+        //     //1. Connection to remote db
+        //     //Package manager - NuGet
+        //     //Connection string
+        //     SqlConnection con = new SqlConnection("Data Source=localhost,1433;Initial Catalog=master;User ID=SA;Password=<YourStrong@Passw0rd>");
+        //
+        //     SqlCommand com = new SqlCommand();
+        //     com.Connection = con;
+        //     com.CommandText = "select * from student";
+        //
+        //     //2. Send the SQL
+        //     con.Open();
+        //     SqlDataReader dr = com.ExecuteReader();
+        //
+        //     //3. Get the result back
+        //     List<string> names = new List<string>();
+        //     while (dr.Read())
+        //     {
+        //         string lname = dr["LastName"].ToString();
+        //         names.Add(lname);
+        //     }
+        //
+        //     //4. Return the result as JSON
+        //     return Ok(names);
+        // }
 
         [HttpGet("{studentId}")]
         public IActionResult GetStudent(int studentId)
@@ -106,8 +136,8 @@ namespace WebApplication1.Controllers
             {
                 studentS.FirstName = updatedData.FirstName;
                 studentS.LastName = updatedData.LastName;
-                studentS.Email = updatedData.Email;
-                studentS.IndexNumber = updatedData.IndexNumber;
+                // studentS.Email = updatedData.Email;
+                // studentS.IndexNumber = updatedData.IndexNumber;
 
                 return Ok(studentS);
             }
