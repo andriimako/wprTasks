@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -37,15 +38,33 @@ namespace WebApplication1.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetStudents()
+        public IActionResult GetStudents(int studentId)
         {
-            return Ok(_students);
+            SqlConnection con =
+                new SqlConnection(
+                    "Data Source=localhost,1433;Initial Catalog=master;User ID=SA;Password=<YourStrong@Passw0rd>");
+            SqlCommand com = new SqlCommand();
+            
+            com.Connection = con;
+            com.CommandText = "select * from Student";
+
+            //2. Send the SQL
+            con.Open();
+            SqlDataReader dr = com.ExecuteReader();
+            
+            List<string> names = new List<string>();
+            while (dr.Read())
+            {
+                string lname = dr["LastName "].ToString();
+                names.Add(lname);
+            }
+
+            return Ok(names);
         }
-        
+
         [HttpGet("{studentId}")]
         public IActionResult GetStudent(int studentId)
         {
-            
             var student = FindStudent(studentId);
             if (student == null)
             {
@@ -64,9 +83,8 @@ namespace WebApplication1.Controllers
             // }
             //
             // return NotFound($"Student with the id {studentId}  was not found");
-
         }
-        
+
         [HttpPost]
         public IActionResult AddStudent(Student newStudent)
         {
@@ -78,30 +96,41 @@ namespace WebApplication1.Controllers
         [HttpPut("{idStudent}")]
         public IActionResult UpdateStudent(int idStudent, Student updatedData)
         {
-            if (idStudent != updatedData.IdStudent)
+            var studentS = FindStudent(idStudent);
+            if (studentS == null)
             {
-                return BadRequest($"Id in the URL ({idStudent}) does not match the id in the request body {updatedData.IdStudent}");
+                return BadRequest(
+                    $"Id in the URL ({idStudent}) does not match the id in the request body {updatedData.IdStudent}");
             }
-            
-            foreach (var student in _students)
+            else
             {
-                if (student.IdStudent == updatedData.IdStudent)
-                {
-                    student.FirstName = updatedData.FirstName;
-                    student.LastName = updatedData.LastName;
-                    student.Email = updatedData.Email;
-                    student.IndexNumber = updatedData.IndexNumber;
-                   
-                    return Ok(student);
-                    
-                }
+                studentS.FirstName = updatedData.FirstName;
+                studentS.LastName = updatedData.LastName;
+                studentS.Email = updatedData.Email;
+                studentS.IndexNumber = updatedData.IndexNumber;
+
+                return Ok(studentS);
             }
-            
+
+
+            // foreach (var student in _students)
+            // {
+            //     if (student.IdStudent == updatedData.IdStudent)
+            //     {
+            //         student.FirstName = updatedData.FirstName;
+            //         student.LastName = updatedData.LastName;
+            //         student.Email = updatedData.Email;
+            //         student.IndexNumber = updatedData.IndexNumber;
+            //        
+            //         return Ok(student);
+            //         
+            //     }
+            // }
+
             return NotFound($"Student with the id {updatedData.IdStudent} cannot be found");
         }
 
         [HttpDelete("{idStudent}")]
-
         public IActionResult DeleteStudent(int idStudent)
         {
             var student = FindStudent(idStudent);
@@ -109,8 +138,9 @@ namespace WebApplication1.Controllers
             {
                 return NotFound($"Student with the id {idStudent} cannot be found");
             }
+
             _students.Remove(student);
-            
+
             return Ok(student);
         }
 
@@ -122,13 +152,9 @@ namespace WebApplication1.Controllers
                 {
                     return student;
                 }
-                
             }
 
             return null;
         }
-        
-                      
-        
     }
 }
